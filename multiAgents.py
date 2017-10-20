@@ -271,7 +271,55 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+
+        action = None
+        # if terminal node
+        if 0 == self.depth:
+            return self.evaluationFunction(gameState)
+        # if a max node
+        if self.index == 0:
+            actions = gameState.getLegalActions(self.index)
+            value = float("inf")
+            v = []
+            for a in actions:
+                v.append((self.expValue(gameState.generateSuccessor(self.index, a), 0, 1), a))
+            value, action = max(v)
+
+        return action
+
+    def maxValue(self, gameState, depth, agentIndex):
+        value = float("-inf")
+        actions = gameState.getLegalActions(agentIndex)
+        v = []
+        if depth == self.depth or len(actions) == 0:
+            return self.evaluationFunction(gameState)
+        else:
+            for a in actions:
+                # values = [value(s') for s' in successors(s)]
+                v.append(self.expValue(gameState.generateSuccessor(agentIndex, a), depth, (agentIndex + 1)))
+            # return max(values)
+            value = max(v)
+        return value
+
+
+    def expValue(self, gameState, depth, agentIndex):
+        value = 0
+        v = []
+        actions = gameState.getLegalActions(agentIndex)
+        if depth == self.depth or len(actions) == 0:
+            return self.evaluationFunction(gameState)
+        else:
+            for a in actions:
+                # values = [value(s') for s' in successors(s)]
+                if agentIndex == gameState.getNumAgents() - 1:
+                    v.append(self.maxValue(gameState.generateSuccessor(agentIndex, a), (depth + 1), 0))
+                else:
+                    v.append(self.expValue(gameState.generateSuccessor(agentIndex, a), depth, (agentIndex + 1)))
+            # weight = [probability (s,s') for s' in successors(s)]
+            # take the average
+            weight = sum(v) / len(v)
+        return weight
 
 def betterEvaluationFunction(currentGameState):
     """
